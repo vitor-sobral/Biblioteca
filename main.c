@@ -1,64 +1,123 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <estatica.h>
 
-typedef struct aluno{
-	char *nome;		//NOME COMPLETO DO ALUNO
-	char *usp;		//NUMERO USP DO ALUNO (STRING POIS PODE VIR A TER MUITOS DÍGITOS)
-	char *telefone;	//NUMERO DE TELEFONE DO ALUNO PARA CONTATO (PODE TER MUITO MAIS DÍGITOS DO QUE UM INTEIRO PODE ARMAZENAR)
-	char *email;	//EMAIL DO ALUNO PARA CONTATO
-} Aluno;
+char *readline(){
+	int counter=0;
+	char c=0, *string=NULL;
 
-typedef struct livro{
-	char *titulo;	//TÍTULO DO LIVRO
-	char *autor;	//NOME DO AUTOR
-	char *isbn;		//ISBN DO LIVRO (NUMERO MUITO GRANDE PARA SER ARMAZENADO EM INT)
-	char *editora;	//NOME DA EDITORA 
-	int ano;		//ANO DA EDICAO
-	int edicao;		//NUMERO DA EDICAO
-	int copias;		//NUMERO DE CÓPIAS (DISPONÍVEIS)
-	Fila *espera;	//FILA DE ESPERA DE ALUNOS
-} Livro;
+	do{
+		c = fgetc(stdin);
+		string = (char *)realloc(string, sizeof(char)*(counter+1));
+		string[counter++] = c;
+	}while(c!=10);
 
-//FUNÇÃO DE CRIAÇÃO DA BIBLIOTECA (VÁLIDA TANTO PARA ESTÁTICA QUANTO PARA DINÂMICA?????????)
-void cria_biblioteca(Biblioteca *B){
-	
-	B->n_livros = 0;
-	B->livros = NULL;
+	string[counter-1] = '\0';
+
+	return string;
 }
 
 //FUNÇÃO PARA IMPRESSÃO DE UM MENU FUNCIONAL NAS PRINCIPAIS ITERAÇÕES COM O SITEMA
 void menu(){
 
 	printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>> BIBLIOTECA <<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n");
-	printf("O que voce deseja?\n\t0 - SAIR\n\t1 - CADASTRAR LIVRO\n\t2 - RETIRAR LIVRO\n\t3 - DEVOLVER LIVRO\n\t4 - REMOVER LIVRO\nOperacao: ");
+	printf("O que voce deseja?\n\t0 - SAIR\n\t1 - CADASTRAR LIVRO\n\t2 - CADASTRAR ALUNO\n\t3 - EMPRESTAR LIVRO\n\t4 - DEVOLVER LIVRO\n\t5 - REMOVER LIVRO\n\t6 - REMOVER ALUNO\nOperacao: ");
 
 }
 
 
 int main (int argc, char *argv[]){
-	Biblioteca B;
-	int op = 1, erro = 0;;
+	ListaLivros B;
+	ListaAlunos A;
+	int op = 1, flag = 0, quantidade;
+	char *nome = NULL, *NUSP = NULL, *telefone = NULL, *email = NULL, 
+		*titulo = NULL, *autor = NULL, *ISBN = NULL, *editora = NULL, *ano = NULL, *edicao = NULL;
 
-	cria_biblioteca(&B);
+	CriarListaLivros(&B);
+	CriarListaAlunos(&A);
 
 	while (op != 0){
 		menu();
 		scanf("%d", &op);
-
 		switch(op){
 			case 0://SAIR DO PROGRAMA
 				break;	
 			case 1://CADASTRAR LIVRO
+					printf("-> Cadastro de Livro ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Titulo: ");
+					titulo = readline();
+					printf("Autor: ");
+					autor = readline();
+					printf("ISBN: ");
+					ISBN = readline();
+					printf("Editora: ");
+					editora  = readline();
+					printf("Ano: ");
+					ano = readline();
+					printf("Edicao: ");
+					edicao = readline();
+					printf("Quantidade: ");
+					scanf("%d", &quantidade);
+					flag = CadastrarLivro(&B, titulo, autor, ISBN, editora, ano, edicao, quantidade);
+					if(flag) printf("\n-> Livro cadastrado com sucesso :)\n------------------------------------------------------------\n");
+					else printf("\n-> Livro nao pode ser cadastrado :(\n------------------------------------------------------------\n");
 				break;
-			case 2://RETIRAR LIVRO
+			case 2://CADASTRAR ALUNO
+					printf("-> Cadastro de Aluno ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Nome: ");
+					nome = readline();
+					printf("NUSP: ");
+					NUSP = readline();
+					printf("Telefone: ");
+					telefone = readline();
+					printf("Email: ");
+					email = readline();
+					flag = CadastrarAluno(&A, nome, NUSP, telefone, email);
+					if(flag) printf("\n-> Aluno cadastrado com sucesso :)\n------------------------------------------------------------\n");
+					else printf("\n-> Aluno nao pode ser cadastrado :(\n------------------------------------------------------------\n");
+				break;	
+			case 3://EMPRESTAR LIVRO
+					printf("-> Emprestimo de Livro ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Nome do Aluno: ");
+					nome = readline();
+					printf("Titulo do Livro: ");
+					titulo = readline();
+					flag = EmprestaLivro(&A, nome, &B, titulo);
+					if(flag) printf("\n-> Emprestimo realizado com sucesso :)\n------------------------------------------------------------\n");
+					else printf("\n-> Emprestimo nao realizado. Voce esta na fila de espera!\n------------------------------------------------------------\n");
+
 				break;
-			case 3://DEVOLVER LIVRO
+			case 4://DEVOLVER LIVRO
+					printf("-> Devolucao de Livro ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Titulo: ");
+					titulo = readline();
+					DevolveLivro(&B, titulo);
+					printf("\n-> Livro devolvido!\n------------------------------------------------------------\n");
 				break;
-			case 4://REMOVER LIVRO
+			case 5://REMOVER LIVRO
+					printf("-> Remocao de Livro ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Titulo: ");
+					titulo = readline();
+					RemoverLivro(&B, titulo);
+					printf("\n-> Livro removido!\n------------------------------------------------------------\n");
+				break;
+			case 6://REMOVER ALUNO
+					printf("-> Remocao de Aluno ---------------------------------------\n");
+					fgetc(stdin);
+					printf("Nome: ");
+					nome = readline();
+					RemoverAluno(&A, nome);
+					printf("\n-> Aluno removido!\n------------------------------------------------------------\n");
 				break;
 		}
-		system("clear");
+		//system("clear");
+		imprime(&B);
 	}
 
 	return 0;
