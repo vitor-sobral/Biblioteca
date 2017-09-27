@@ -1,7 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <estatica.h>
+#include <limits.h>
+//#include <estatica.h>
+#include "dinamica.h"
 
 char *readline(){
 	int counter=0;
@@ -18,7 +20,7 @@ char *readline(){
 	return string;
 }
 
-//FUNÇÃO PARA IMPRESSÃO DE UM MENU FUNCIONAL NAS PRINCIPAIS ITERAÇÕES COM O SITEMA
+//FUNCAO PARA IMPRESSAO DE UM MENU FUNCIONAL NAS PRINCIPAIS ITERACOES COM O SISTEMA
 void menu(){
 
 	printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>> BIBLIOTECA <<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n");
@@ -61,6 +63,7 @@ int main (int argc, char *argv[]){
 					printf("Quantidade: ");
 					scanf("%d", &quantidade);
 					flag = CadastrarLivro(&B, titulo, autor, ISBN, editora, ano, edicao, quantidade);
+					printf("\nFLAG = %d\n", flag);
 					if(flag) printf("\n-> Livro cadastrado com sucesso :)\n------------------------------------------------------------\n");
 					else printf("\n-> Livro nao pode ser cadastrado :(\n------------------------------------------------------------\n");
 				break;
@@ -112,13 +115,16 @@ int main (int argc, char *argv[]){
 					fgetc(stdin);
 					printf("Nome: ");
 					nome = readline();
-					RemoverAluno(&A, nome);
+					RemoverAluno(&A, nome, &B);
 					printf("\n-> Aluno removido!\n------------------------------------------------------------\n");
 				break;
 		}
-		//system("clear");
+		
 		imprime(&B);
+		imprime_alunos(&A);
 	}
+
+	LiberaMemoria(&A, &B);
 
 	return 0;
 }
