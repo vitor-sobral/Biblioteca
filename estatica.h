@@ -9,42 +9,46 @@
 
 typedef struct {
 	char nome[100], NUSP[6], telefone[10],email[50];
+	int prox;
 } Aluno;
 
 typedef struct {
-	int fim;
+	int inicio,fim,pv,total;
 	Aluno alunos[tam_lista_alunos];
 } ListaAlunos;
 
 typedef struct {
-	int inicio,fim,total;
+	int inicio,fim,total,pv;
 	Aluno espera[tam_lista_espera];
 }FilaEspera;
 
 typedef struct {
 	char titulo[100],autor[100],ISBN[20],editora[50],ano[4],edicao[3];
-	int total;
+	int total,prox;
 	FilaEspera Fila;
 } Livro;
 
 typedef struct {
-	int fim;
+	int inicio,fim,pv,total;
 	Livro livros[tam_lista_livros];
 } ListaLivros;
 
+
 void CriarListaLivros(ListaLivros *);
 void CriarListaAlunos(ListaAlunos *);
-int BuscaAluno(ListaAlunos *Lista, char *aluno);
-int BuscaLivro(ListaLivros *Lista,char *livro);
-void imprime(ListaLivros *Lista);
-void imprime_espera(Livro L);
-int CadastrarAluno(ListaAlunos *Lista,char *nome,char *NUSP,char *telefone,char *email);
-int CadastrarLivro(ListaLivros *Lista,char *titulo,char *autor,char *ISBN,char *editora,char *ano,char *edicao,int quantidade);
-int EmprestaLivro(ListaAlunos *ListaAluno,char *aluno,ListaLivros *ListaLiv,char *livro);
-void DevolveLivro(ListaLivros *Lista, char *livro);
-void RemoverLivro(ListaLivros *Lista,char *livro);
-void RemoverAluno(ListaAlunos *Lista,char *aluno);
-
+int BuscaAluno(ListaAlunos*, char*);
+int BuscaLivro(ListaLivros *,char *);
+void imprime_alunos(ListaAlunos*);
+void imprime(ListaLivros *);
+void imprime_espera(Livro);
+int CadastrarAluno(ListaAlunos *,char *,char *,char *,char *);
+int CadastrarLivro(ListaLivros *,char *,char *,char *,char *,char *,char *,int);
+int EmprestaLivro(ListaAlunos *,char *,ListaLivros *,char*);
+void DevolveLivro(ListaLivros *, char *);
+void RemoverLivro(ListaLivros *,char *);
+void RemoverAluno(ListaAlunos *,char *,ListaLivros *);
+void AlunoFilaRemove(ListaAlunos*,int*, Livro *);
+void LiberaMemoria(ListaAlunos*,Listalivros*);
 
 
 #endif //INCLUDED
