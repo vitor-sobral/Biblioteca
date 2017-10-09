@@ -7,9 +7,14 @@
 #define tam_lista_alunos 200
 #define tam_lista_espera 50
 
+typedef struct{
+char msg[40];
+}Recados;
+
 typedef struct {
 	char nome[100], NUSP[6], telefone[10],email[50];
-	int prox;
+	int prox,prox_espera,topo;
+	Recados mensagem[5];
 } Aluno;
 
 typedef struct {
@@ -19,7 +24,7 @@ typedef struct {
 
 typedef struct {
 	int inicio,fim,total,pv;
-	Aluno espera[tam_lista_espera];
+	Aluno *espera[tam_lista_espera];
 }FilaEspera;
 
 typedef struct {
@@ -48,7 +53,8 @@ void DevolveLivro(ListaLivros *, char *);
 void RemoverLivro(ListaLivros *,char *);
 void RemoverAluno(ListaAlunos *,char *,ListaLivros *);
 void AlunoFilaRemove(ListaAlunos*,int*, Livro *);
-void LiberaMemoria(ListaAlunos*,Listalivros*);
-
+void LiberaMemoria(ListaAlunos*,ListaLivros*);
+void Mensagem(Aluno*,char*);
+void Imprime_Mensagem(ListaAlunos*,char*);
 
 #endif //INCLUDED

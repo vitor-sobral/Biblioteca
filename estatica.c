@@ -39,10 +39,14 @@ void CriarListaAlunos(ListaAlunos *Lista){
     Lista->fim = 0;
     Lista->pv=0;
 
-	for(i=0;i<tam_lista_alunos;i++)
+	for(i=0;i<tam_lista_alunos;i++){
+        Lista->alunos[i].topo=-1;
         Lista->alunos[i].prox=i+1;
+        Lista->alunos[i].prox_espera=i+1;
+	}
 
     Lista->alunos[i].prox=-1;
+    Lista->alunos[i].prox_espera=-1;
 	return;
 }
 
@@ -55,10 +59,8 @@ void CriarListaLivros(ListaLivros *Lista){
 	Lista->total=0;
 	Lista->pv=0;
 
-	for(i=0;i<tam_lista_livros;i++){
+	for(i=0;i<tam_lista_livros;i++)
         Lista->livros[i].prox=i+1;
-        //printf("// %d -> %d //",i,Lista->livros[i].prox);
-	}
 
     Lista->livros[tam_lista_livros-1].prox=-1;
 	return;
@@ -69,12 +71,13 @@ void imprime_espera(Livro L){
 	int i = 0,aux=L.Fila.inicio;
 
 	for(i = L.Fila.inicio; i < L.Fila.total; i++){
-		printf("%s | ", L.Fila.espera[aux].nome);
-		aux=L.Fila.espera[aux].prox;
+		printf("%s | ", L.Fila.espera[aux]->nome);
+		aux=L.Fila.espera[aux]->prox_espera;
 	}
 
 }
 
+//IMPRIME A LISTA DE LIVROS.
 void imprime(ListaLivros *Lista){
 	int i = 0,aux;
 	printf("\n");
@@ -87,6 +90,7 @@ void imprime(ListaLivros *Lista){
 	printf("\n");
 }
 
+//IMPRIME A LISTA DE ALUNOS.
 void imprime_alunos(ListaAlunos *A){
     int i,aux;
     aux=A->inicio;
@@ -143,6 +147,10 @@ int CadastrarLivro(ListaLivros *Lista,char *titulo,char *autor,char *ISBN,char *
 	strcpy(Lista->livros[Lista->pv].ano,ano);
 	strcpy(Lista->livros[Lista->pv].edicao,edicao);
 	Lista->livros[Lista->pv].total = quantidade;
+	Lista->livros[Lista->pv].Fila.inicio=0;
+	Lista->livros[Lista->pv].Fila.fim=0;
+	Lista->livros[Lista->pv].Fila.total=0;
+	Lista->livros[Lista->pv].Fila.pv=0;
     //Lista->livros[Lista->pv].prox=-1;
     if(Lista->fim!=Lista->pv)
         Lista->livros[Lista->fim].prox=Lista->pv;
@@ -162,10 +170,9 @@ int EmprestaLivro(ListaAlunos *ListaAluno,char *aluno,ListaLivros *ListaLiv,char
 
 	//Se não houverem livros disponíveis
 	if(ListaLiv->livros[numlivro].total==0){
-	    ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv] = ListaAluno->alunos[numaluno];
+	    ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv] = &ListaAluno->alunos[numaluno];
 	    ListaLiv->livros[numlivro].Fila.fim = ListaLiv->livros[numlivro].Fila.pv;
-	    ListaLiv->livros[numlivro].Fila.pv=ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv].prox;
-	    ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.fim].prox=-1;
+	    ListaLiv->livros[numlivro].Fila.pv=ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv]->prox_espera;
 	    ListaLiv->livros[numlivro].Fila.total += 1;
 	    return 0;
 	}
@@ -184,14 +191,16 @@ int EmprestaLivro(ListaAlunos *ListaAluno,char *aluno,ListaLivros *ListaLiv,char
 //DEVOLVE UM LIVRO E JÁ O EMPRESTA PARA O PŔOXIMO DA FILA DE ESPERA, SE HOUVER.
 void DevolveLivro(ListaLivros *Lista, char *livro){
 	int numlivro;
+	char mensagem[50]={"Você pode retirar o Livro "};
 
 	numlivro = BuscaLivro(Lista,livro);
 
 	Lista->livros[numlivro].total+=1;
 
-	//Implementar alguma função para avisar o aluno que o livro pode ser retirado.
 	if(Lista->livros[numlivro].Fila.total > 0){
-		Lista->livros[numlivro].Fila.inicio = Lista->livros[numlivro].Fila.espera[Lista->livros[numlivro].Fila.inicio].prox;
+        strcat(mensagem,livro);
+        Mensagem(Lista->livros[numlivro].Fila.espera[Lista->livros[numlivro].Fila.inicio],mensagem);
+		Lista->livros[numlivro].Fila.inicio = Lista->livros[numlivro].Fila.espera[Lista->livros[numlivro].Fila.inicio]->prox_espera;
 	    Lista->livros[numlivro].Fila.total -= 1;
 	    Lista->livros[numlivro].total -= 1;
 	}
@@ -249,20 +258,53 @@ void RemoverAluno(ListaAlunos *Lista,char *aluno,ListaLivros *Liv){
         AlunoFilaRemove(Lista,&numaluno,&Liv->livros[i]);
 }
 
+//REMOVE O ALUNO DE TODAS AS FILAS DE ESPERA.
 void AlunoFilaRemove(ListaAlunos *A,int *numaluno, Livro *L){
     int i,aux,anterior;
     aux=L->Fila.inicio;
+    anterior=aux;
     for(i=0;i<L->Fila.total;i++){
-        if(!strcmp(L->Fila.espera[aux].nome,A->alunos[*numaluno].nome)){
-            L->Fila.espera[anterior].prox=-1;
-            L->Fila.espera[aux].prox=L->Fila.pv;
+        if(!strcmp(L->Fila.espera[aux]->nome,A->alunos[*numaluno].nome)){
+            if(aux==L->Fila.inicio)
+                L->Fila.inicio=L->Fila.espera[aux]->prox_espera;
+            L->Fila.espera[anterior]->prox_espera=L->Fila.espera[aux]->prox_espera;
+            L->Fila.espera[aux]->prox_espera=L->Fila.pv;
             L->Fila.pv=aux;
         }
         anterior=aux;
-        aux=L->Fila.espera[aux].prox;
+        aux=L->Fila.espera[aux]->prox_espera;
     }
 }
 
+//PARA MANTER MAIN IGUAL.
 void LiberaMemoria(ListaAlunos *A,ListaLivros *L){
 return;
+}
+
+//ANOTA UMA MENSAGEM NO PERFIL DO ALUNO
+void Mensagem(Aluno *A,char *mensagem){
+    if(A->topo==4)
+        return;
+
+    A->topo+=1;
+    strcpy(A->mensagem[A->topo].msg,mensagem);
+    return;
+}
+
+//IMPRIMEAS MENSAGENS DO ALUNO
+void Imprime_Mensagem(ListaAlunos *L,char *aluno){
+    int numaluno;
+    numaluno=BuscaAluno(L,aluno);
+
+    if(L->alunos[numaluno].topo==-1){
+        printf("NENHUMA MENSAGEM");
+        return;
+    }
+
+    while(L->alunos[numaluno].topo>=0){
+        printf("\n- %s",L->alunos[numaluno].mensagem[L->alunos[numaluno].topo].msg);
+        L->alunos[numaluno].topo-=1;
+    }
+
+    return;
 }
