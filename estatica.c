@@ -111,7 +111,10 @@ int CadastrarAluno(ListaAlunos *Lista,char *nome,char *NUSP,char *telefone,char 
     numaluno = BuscaAluno(Lista, nome);
 
 	if(numaluno != -1)
-        return 1;
+        return 0;
+
+    if(Lista->total == 0)
+        Lista->inicio = Lista->pv;
 
 	strcpy(Lista->alunos[Lista->pv].nome,nome);
 	strcpy(Lista->alunos[Lista->pv].NUSP,NUSP);
@@ -139,6 +142,9 @@ int CadastrarLivro(ListaLivros *Lista,char *titulo,char *autor,char *ISBN,char *
 		Lista->livros[numlivro].total += quantidade;
 		return 1;
 	}
+
+	if(Lista->total == 0)
+        Lista->inicio = Lista->pv;
 
 	strcpy(Lista->livros[Lista->pv].titulo,titulo);
 	strcpy(Lista->livros[Lista->pv].autor,autor);
@@ -168,8 +174,12 @@ int EmprestaLivro(ListaAlunos *ListaAluno,char *aluno,ListaLivros *ListaLiv,char
 	numaluno = BuscaAluno(ListaAluno,aluno);
 	numlivro = BuscaLivro(ListaLiv,livro);
 
+	if(numaluno == -1) return 2;
+
+    if(numlivro == -1) return 3;
+
 	//Se não houverem livros disponíveis
-	if(ListaLiv->livros[numlivro].total==0){
+	if(ListaLiv->livros[numlivro].total == 0){
 	    ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv] = &ListaAluno->alunos[numaluno];
 	    ListaLiv->livros[numlivro].Fila.fim = ListaLiv->livros[numlivro].Fila.pv;
 	    ListaLiv->livros[numlivro].Fila.pv=ListaLiv->livros[numlivro].Fila.espera[ListaLiv->livros[numlivro].Fila.pv]->prox_espera;
@@ -222,11 +232,11 @@ void RemoverLivro(ListaLivros *L,char *livro){
     else{
     for(i=0;i<L->total;i++){
         if(!strcmp(L->livros[L->livros[aux].prox].titulo,livro)){
-            numlivro=L->livros[aux].prox;
-            L->livros[aux].prox=L->livros[numlivro].prox;
-            L->livros[numlivro].prox=L->pv;
-            L->pv=numlivro;
-            L->total-=1;
+            numlivro = L->livros[aux].prox;
+            L->livros[aux].prox = L->livros[numlivro].prox;
+            L->livros[numlivro].prox = L->pv;
+            L->pv = numlivro;
+            L->total -= 1;
             L->livros[numlivro].Fila.total = 0;
             L->livros[numlivro].Fila.inicio = 0;
             L->livros[numlivro].Fila.fim = 0;
@@ -238,10 +248,17 @@ void RemoverLivro(ListaLivros *L,char *livro){
 
 //REMOVE UM ALUNO DA BIBLIOTECA, COLOCA O ALUNO NO PRIMEIRO VAZIO.
 void RemoverAluno(ListaAlunos *Lista,char *aluno,ListaLivros *Liv){
-	int i=0,aux=Lista->inicio,numaluno;
+	int i = 0,aux = Lista->inicio,numaluno = aux;
 
 	//numaluno = BuscaAluno(Lista,aluno);
 
+	if(!strcmp(Lista->alunos[aux].nome,aluno)){
+        Lista->inicio = Lista->alunos[Lista->inicio].prox;
+        Lista->alunos[aux].prox = Lista->pv;
+        Lista->pv = aux;
+        Lista->total -= 1;
+	}
+	else{
     for(i=0;i<Lista->total;i++){
         if(!strcmp(Lista->alunos[Lista->alunos[aux].prox].nome,aluno)){
             numaluno=Lista->alunos[aux].prox;
@@ -252,10 +269,13 @@ void RemoverAluno(ListaAlunos *Lista,char *aluno,ListaLivros *Liv){
             break;
         }
     }
+	}
 
-
-	for(i=0;i<Liv->fim;i++)
-        AlunoFilaRemove(Lista,&numaluno,&Liv->livros[i]);
+    aux=Liv->inicio;
+	for(i=0;i<Liv->total;i++){
+        AlunoFilaRemove(Lista,&numaluno,&Liv->livros[aux]);
+        aux = Liv->livros[aux].prox;
+	}
 }
 
 //REMOVE O ALUNO DE TODAS AS FILAS DE ESPERA.

@@ -24,7 +24,7 @@ char *readline(){
 void menu(){
 
 	printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>> BIBLIOTECA <<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n");
-	printf("O que voce deseja?\n\t0 - SAIR\n\t1 - CADASTRAR LIVRO\n\t2 - CADASTRAR ALUNO\n\t3 - EMPRESTAR LIVRO\n\t4 - DEVOLVER LIVRO\n\t5 - REMOVER LIVRO\n\t6 - REMOVER ALUNO\n\t6 - CHECAR MENSAGENS DE ALUNO\nOperacao: ");
+	printf("O que voce deseja?\n\t0 - SAIR\n\t1 - CADASTRAR LIVRO\n\t2 - CADASTRAR ALUNO\n\t3 - EMPRESTAR LIVRO\n\t4 - DEVOLVER LIVRO\n\t5 - REMOVER LIVRO\n\t6 - REMOVER ALUNO\n\t7 - CHECAR MENSAGENS DE ALUNO\nOperacao: ");
 
 }
 
@@ -90,9 +90,10 @@ int main (int argc, char *argv[]){
 					printf("Titulo do Livro: ");
 					titulo = readline();
 					flag = EmprestaLivro(&A, nome, &B, titulo);
-					if(flag) printf("\n-> Emprestimo realizado com sucesso \n------------------------------------------------------------\n");
-					else printf("\n-> Emprestimo nao realizado. Voce esta na fila de espera!\n------------------------------------------------------------\n");
-
+					if(flag == 1) printf("\n-> Emprestimo realizado com sucesso \n------------------------------------------------------------\n");
+					if(flag == 0) printf("\n-> Emprestimo nao realizado. Voce esta na fila de espera!\n------------------------------------------------------------\n");
+                    if(flag == 2) printf("\n-> Aluno não encontrado \n------------------------------------------------------------\n");
+                    if(flag == 3) printf("\n-> Livro não encontrado \n------------------------------------------------------------\n");
 				break;
 			case 4://DEVOLVER LIVRO
 					printf("-> Devolucao de Livro ---------------------------------------\n");
